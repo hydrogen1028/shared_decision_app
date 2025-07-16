@@ -28,3 +28,12 @@ if admin_mode:
         admin_tools()
     else:
         st.sidebar.warning("Incorrect password.")
+
+from logic.match_trials import match_trials
+
+trial_matches = match_trials(patient_data)
+if not trial_matches.empty:
+    st.subheader("🧪 Eligible Clinical Trials")
+    for _, trial in trial_matches.iterrows():
+        st.markdown(f"**{trial['trial_name']}** — {trial['custom_note']}")
+
