@@ -16,6 +16,14 @@ if patient_data:
     else:
         st.warning("No therapies matched for this input. Please review criteria.")
 
+from logic.match_trials import match_trials
+
+trial_matches = match_trials(patient_data)
+if not trial_matches.empty:
+    st.subheader("🧪 Eligible Clinical Trials")
+    for _, trial in trial_matches.iterrows():
+        st.markdown(f"**{trial['trial_name']}** — {trial['custom_note']}")
+
 import streamlit as st
 
 # Fake login
@@ -29,11 +37,4 @@ if admin_mode:
     else:
         st.sidebar.warning("Incorrect password.")
 
-from logic.match_trials import match_trials
-
-trial_matches = match_trials(patient_data)
-if not trial_matches.empty:
-    st.subheader("🧪 Eligible Clinical Trials")
-    for _, trial in trial_matches.iterrows():
-        st.markdown(f"**{trial['trial_name']}** — {trial['custom_note']}")
 
