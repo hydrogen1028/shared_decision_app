@@ -1,0 +1,17 @@
+{
+  "lung cancer": {
+    "stage IV": [
+      {
+        "name": "Carboplatin + Pemetrexed",
+        "eligibility": {
+          "ECOG": [0, 1],
+          "age": [18, 75]
+        },
+        "efficacy": {"PFS": "6.9 mo", "OS": "14.1 mo"},
+        "side_effects": {"Nausea": 70, "Fatigue": 60},
+        "schedule": "Q3W for 4-6 cycles",
+        "price_per_cycle": 60000
+      }
+    ]
+  }
+}
