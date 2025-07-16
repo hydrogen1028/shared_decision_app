@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Therapy Summary</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h2 { color: #2c3e50; }
+        table { border-collapse: collapse; width: 100%; }
+        td, th { border: 1px solid #ccc; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h2>Selected Therapy: {{ name }}</h2>
+    <p><strong>Eligibility:</strong> Age {{ age[0] }}–{{ age[1] }}, ECOG {{ ECOG }}</p>
+    <p><strong>Efficacy:</strong> PFS = {{ pfs }}, OS = {{ os }}</p>
+    <p><strong>Schedule:</strong> {{ schedule }}</p>
+    <p><strong>Price per Cycle:</strong> NT$ {{ price }}</p>
+
+    <h3>Side Effects</h3>
+    <table>
+        <tr><th>Side Effect</th><th>Percentage (%)</th></tr>
+        {% for se, pct in side_effects.items() %}
+        <tr><td>{{ se }}</td><td>{{ pct }}</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
