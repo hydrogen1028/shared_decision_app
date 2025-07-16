@@ -15,3 +15,16 @@ if patient_data:
         display_therapies(suggestions)
     else:
         st.warning("No therapies matched for this input. Please review criteria.")
+
+import streamlit as st
+
+# Fake login
+st.sidebar.title("🔐 Admin Access")
+admin_mode = st.sidebar.checkbox("Admin Mode")
+if admin_mode:
+    password = st.sidebar.text_input("Enter Admin Password", type="password")
+    if password == "mysecret123":
+        from ui.admin_panel import admin_tools
+        admin_tools()
+    else:
+        st.sidebar.warning("Incorrect password.")
