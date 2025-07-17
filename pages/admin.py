@@ -45,6 +45,10 @@ guidelines = load_guidelines()
 st.title("📋 Edit Recommended Anti-Cancer Regimens")
 
 # Form to add new entry
+from utils.side_effects import load_common_side_effects, save_common_side_effect
+
+common_side_effects = load_common_side_effects()
+
 st.subheader("➕ Add New Cancer Regimen")
 with st.form("add_regimen_form"):
     cancer_type = st.text_input("Cancer Type")
@@ -55,43 +59,6 @@ with st.form("add_regimen_form"):
     os_val = st.text_input("OS")
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
-
-    submitted = st.form_submit_button("Add Regimen")
-    if submitted:
-        # Check if entry exists
-        found = False
-        for entry in guidelines:
-            if entry["cancer_type"] == cancer_type and entry["stage"] == stage:
-                entry["regimens"].append({
-                    "name": name,
-                    "eligibility": eligibility,
-                    "efficacy": {"PFS": pfs, "OS": os_val},
-                    "side_effects": side_effects_dict,
-                    "schedule": schedule,
-                    "cost": cost
-                })
-                found = True
-                break
-
-        if not found:
-            guidelines.append({
-                "cancer_type": cancer_type,
-                "stage": stage,
-                "regimens": [{
-                    "name": name,
-                    "eligibility": eligibility,
-                    "efficacy": {"PFS": pfs, "OS": os_val},
-                    "side_effects": side_effects_dict,
-                    "schedule": schedule,
-                    "cost": cost
-                }]
-            })
-
-        save_guidelines(guidelines)
-
-from utils.side_effects import load_common_side_effects, save_common_side_effect
-
-common_side_effects = load_common_side_effects()
 
 st.markdown("### Side Effects Input")
 side_effects_dict = {}
@@ -119,14 +86,38 @@ for i in range(num_effects):
             "grade": severity,
             "percent": percent
         }
-
-    submitted = st.form_submit_button("✅ Save Side Effects")
+    
+ submitted = st.form_submit_button("✅ Add Regimen")
 
     if submitted:
-        for effect in side_effects_dict:
-            save_common_side_effect(effect)
-        st.success("Side effects saved successfully!")
-        
+        if cancer_type and stage and regimen_name:
+            # Add side effect to persistent list
+            for effect in side_effects_dict:
+                save_common_side_effect(effect)
+
+            new_entry = {
+                "cancer_type": cancer_type,
+                "stage": stage,
+                "regimen": regimen_name,
+                "efficacy": {
+                    "OS": efficacy_os,
+                    "PFS": efficacy_pfs,
+                },
+                "schedule": schedule,
+                "price": price,
+                "side_effects": side_effects_dict,
+            }
+
+            # Append new_entry to JSON file
+            with open("data/cancer_guidelines.json", "r") as f:
+                data = json.load(f)
+            data.append(new_entry)
+            with open("data/cancer_guidelines.json", "w") as f:
+                json.dump(data, f, indent=2)
+
+            st.success("✅ Regimen added successfully!")
+        else:
+            st.error("Please fill in all required fields.")
    
 
 # Show current data
