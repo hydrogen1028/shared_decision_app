@@ -56,7 +56,8 @@ with st.form("add_regimen_form"):
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
 
-   from utils.side_effects import load_common_side_effects, save_common_side_effect
+
+from utils.side_effects import load_common_side_effects, save_common_side_effect
 
 common_side_effects = load_common_side_effects()
 
