@@ -55,7 +55,7 @@ with st.form("add_regimen_form"):
     os_val = st.text_input("OS")
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
-
+ submitted = st.form_submit_button("Add Regimen")
 
 from utils.side_effects import load_common_side_effects, save_common_side_effect
 
@@ -88,8 +88,6 @@ for i in range(num_effects):
             "percent": percent
         }
 
-
-    submitted = st.form_submit_button("Add Regimen")
 
     if submitted:
         # Check if entry exists
