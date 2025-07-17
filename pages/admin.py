@@ -20,90 +20,99 @@ import streamlit as st
 import json
 import os
 
-guideline_path = "data/cancer_guidelines.json"
+GUIDELINE_PATH = "data/cancer_guidelines.json"
 
-# Load existing data
-if os.path.exists(guideline_path):
-    with open(guideline_path, "r") as f:
-        try:
-            cancer_guidelines = json.load(f)
-        except json.JSONDecodeError:
-            cancer_guidelines = []
-else:
-    cancer_guidelines = []
+# Load guidelines
+def load_guidelines():
+    try:
+        with open(GUIDELINE_PATH, "r") as f:
+            data = json.load(f)
+            if isinstance(data, list):
+                return data
+    except Exception as e:
+        st.warning(f"Could not load guidelines: {e}")
+    return []
 
-st.title("📘 Edit Cancer Guidelines")
+# Save guidelines
+def save_guidelines(data):
+    try:
+        with open(GUIDELINE_PATH, "w") as f:
+            json.dump(data, f, indent=2)
+        st.success("✅ Saved successfully!")
+    except Exception as e:
+        st.error(f"❌ Failed to save: {e}")
 
-# Get all existing cancer types + stages
-entries = {(item["cancer_type"], item["stage"]): item for item in cancer_guidelines}
+# Load current
+guidelines = load_guidelines()
 
-# --- Select or Add New Cancer Type/Stage ---
-st.subheader("🔍 Select Cancer Type and Stage")
-cancer_types = list(set([item["cancer_type"] for item in cancer_guidelines]))
-selected_type = st.selectbox("Cancer Type", cancer_types + ["➕ Add new..."])
+st.title("📋 Edit Recommended Anti-Cancer Regimens")
 
-if selected_type == "➕ Add new...":
-    selected_type = st.text_input("Enter new cancer type")
+# Form to add new entry
+st.subheader("➕ Add New Cancer Regimen")
+with st.form("add_regimen_form"):
+    cancer_type = st.text_input("Cancer Type")
+    stage = st.text_input("Stage")
+    name = st.text_input("Regimen Name")
+    eligibility = st.text_input("Eligibility Criteria")
+    pfs = st.text_input("PFS")
+    os_val = st.text_input("OS")
+    side_effects = st.text_area("Side Effects (format: name:percent per line)")
+    schedule = st.text_input("Schedule")
+    cost = st.number_input("Estimated Cost", min_value=0)
 
-selected_stage = st.text_input("Enter Stage", value="II")
+    submitted = st.form_submit_button("Add Regimen")
 
-entry_key = (selected_type, selected_stage)
+    if submitted:
+        side_effects_dict = {}
+        for line in side_effects.splitlines():
+            if ":" in line:
+                k, v = line.split(":", 1)
+                side_effects_dict[k.strip()] = v.strip()
 
-# Get or initialize regimens
-entry = entries.get(entry_key, {"cancer_type": selected_type, "stage": selected_stage, "regimens": []})
+        # Check if entry exists
+        found = False
+        for entry in guidelines:
+            if entry["cancer_type"] == cancer_type and entry["stage"] == stage:
+                entry["regimens"].append({
+                    "name": name,
+                    "eligibility": eligibility,
+                    "efficacy": {"PFS": pfs, "OS": os_val},
+                    "side_effects": side_effects_dict,
+                    "schedule": schedule,
+                    "cost": cost
+                })
+                found = True
+                break
 
-st.markdown("---")
-st.subheader(f"🧪 Regimens for {selected_type} (Stage {selected_stage})")
+        if not found:
+            guidelines.append({
+                "cancer_type": cancer_type,
+                "stage": stage,
+                "regimens": [{
+                    "name": name,
+                    "eligibility": eligibility,
+                    "efficacy": {"PFS": pfs, "OS": os_val},
+                    "side_effects": side_effects_dict,
+                    "schedule": schedule,
+                    "cost": cost
+                }]
+            })
 
-for i, regimen in enumerate(entry["regimens"]):
-    with st.expander(f"Regimen {i+1}: {regimen['name']}"):
-        regimen["name"] = st.text_input(f"Regimen Name {i+1}", regimen["name"], key=f"name_{i}")
-        regimen["eligibility"] = st.text_area(f"Eligibility {i+1}", regimen.get("eligibility", ""), key=f"elig_{i}")
-        regimen["efficacy"]["PFS"] = st.text_input(f"PFS {i+1}", regimen["efficacy"].get("PFS", ""), key=f"pfs_{i}")
-        regimen["efficacy"]["OS"] = st.text_input(f"OS {i+1}", regimen["efficacy"].get("OS", ""), key=f"os_{i}")
-        
-        st.markdown("**Common Side Effects (%):**")
-        for side_effect, value in regimen["side_effects"].items():
-            new_value = st.text_input(f"{side_effect}", value, key=f"se_{i}_{side_effect}")
-            regimen["side_effects"][side_effect] = new_value
-        
-        new_side = st.text_input(f"Add new side effect to Regimen {i+1}", key=f"addse_{i}")
-        new_side_val = st.text_input(f"Percentage", key=f"addseval_{i}")
-        if new_side and new_side_val:
-            regimen["side_effects"][new_side] = new_side_val
+        save_guidelines(guidelines)
 
-        regimen["schedule"] = st.text_input(f"Schedule {i+1}", regimen.get("schedule", ""), key=f"sched_{i}")
-        regimen["cost"] = st.number_input(f"Cost {i+1}", value=float(regimen.get("cost", 0)), key=f"cost_{i}")
-
-# --- Add New Regimen ---
-st.markdown("---")
-st.subheader("➕ Add New Regimen")
-if st.button("Add Empty Regimen"):
-    entry["regimens"].append({
-        "name": "New Regimen",
-        "eligibility": "",
-        "efficacy": {"PFS": "", "OS": ""},
-        "side_effects": {},
-        "schedule": "",
-        "cost": 0
-    })
-
-# --- Save Changes ---
-if st.button("💾 Save Guidelines"):
-    # Update the original list
-    updated = False
-    for i, item in enumerate(cancer_guidelines):
-        if item["cancer_type"] == selected_type and item["stage"] == selected_stage:
-            cancer_guidelines[i] = entry
-            updated = True
-            break
-    if not updated:
-        cancer_guidelines.append(entry)
-
-    with open(guideline_path, "w") as f:
-        json.dump(cancer_guidelines, f, indent=2)
-    st.success("✅ Guidelines updated and saved!")
-
+# Show current data
+st.subheader("📖 Current Regimens")
+for entry in guidelines:
+    with st.expander(f"{entry['cancer_type']} – Stage {entry['stage']}"):
+        for regimen in entry["regimens"]:
+            st.markdown(f"- **{regimen['name']}**")
+            st.markdown(f"  - Eligibility: {regimen['eligibility']}")
+            st.markdown(f"  - Efficacy: PFS={regimen['efficacy'].get('PFS')}, OS={regimen['efficacy'].get('OS')}")
+            st.markdown(f"  - Schedule: {regimen['schedule']}")
+            st.markdown(f"  - Cost: {regimen['cost']}")
+            st.markdown("  - Side Effects:")
+            for k, v in regimen["side_effects"].items():
+                st.markdown(f"    - {k}: {v}")
 
 # Upload clinical trials
 st.subheader("🧪 Upload Clinical Trials (CSV)")
