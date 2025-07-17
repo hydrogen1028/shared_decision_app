@@ -56,6 +56,40 @@ with st.form("add_regimen_form"):
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
 
+
+submitted = st.form_submit_button("Add Regimen")
+    if submitted:
+        # Check if entry exists
+        found = False
+        for entry in guidelines:
+            if entry["cancer_type"] == cancer_type and entry["stage"] == stage:
+                entry["regimens"].append({
+                    "name": name,
+                    "eligibility": eligibility,
+                    "efficacy": {"PFS": pfs, "OS": os_val},
+                    "side_effects": side_effects_dict,
+                    "schedule": schedule,
+                    "cost": cost
+                })
+                found = True
+                break
+
+        if not found:
+            guidelines.append({
+                "cancer_type": cancer_type,
+                "stage": stage,
+                "regimens": [{
+                    "name": name,
+                    "eligibility": eligibility,
+                    "efficacy": {"PFS": pfs, "OS": os_val},
+                    "side_effects": side_effects_dict,
+                    "schedule": schedule,
+                    "cost": cost
+                }]
+            })
+
+        save_guidelines(guidelines)
+
 from utils.side_effects import load_common_side_effects, save_common_side_effect
 
 common_side_effects = load_common_side_effects()
@@ -94,38 +128,7 @@ for i in range(num_effects):
             save_common_side_effect(effect)
         st.success("Side effects saved successfully!")
         
-    submitted = st.form_submit_button("Add Regimen")
-    if submitted:
-        # Check if entry exists
-        found = False
-        for entry in guidelines:
-            if entry["cancer_type"] == cancer_type and entry["stage"] == stage:
-                entry["regimens"].append({
-                    "name": name,
-                    "eligibility": eligibility,
-                    "efficacy": {"PFS": pfs, "OS": os_val},
-                    "side_effects": side_effects_dict,
-                    "schedule": schedule,
-                    "cost": cost
-                })
-                found = True
-                break
-
-        if not found:
-            guidelines.append({
-                "cancer_type": cancer_type,
-                "stage": stage,
-                "regimens": [{
-                    "name": name,
-                    "eligibility": eligibility,
-                    "efficacy": {"PFS": pfs, "OS": os_val},
-                    "side_effects": side_effects_dict,
-                    "schedule": schedule,
-                    "cost": cost
-                }]
-            })
-
-        save_guidelines(guidelines)
+   
 
 # Show current data
 st.subheader("📖 Current Regimens")
