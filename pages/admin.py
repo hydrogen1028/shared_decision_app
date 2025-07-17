@@ -47,21 +47,23 @@ st.title("📋 Edit Recommended Anti-Cancer Regimens")
 # Form to add new entry
 from utils.side_effects import load_common_side_effects, save_common_side_effect
 
+# Load the common side effects
 common_side_effects = load_common_side_effects()
 
-
+# Inside your main regimen form
 with st.form("add_regimen_form"):
-    st.subheader("➕ Add New Cancer Regimen")
-    # basic regimen fields
+    st.subheader("🧪 Add New Regimen")
+
+    # Basic regimen fields
     cancer_type = st.text_input("Cancer Type")
     stage = st.text_input("Stage")
-    name = st.text_input("Regimen Name")
-    eligibility = st.text_input("Eligibility Criteria")
-    pfs = st.text_input("PFS")
-    os_val = st.text_input("OS")
-    schedule = st.text_input("Schedule")
-    cost = st.number_input("Estimated Cost", min_value=0)
-    # side effect section
+    regimen_name = st.text_input("Regimen Name")
+    efficacy_os = st.text_input("Overall Survival (OS)")
+    efficacy_pfs = st.text_input("Progression-Free Survival (PFS)")
+    schedule = st.text_area("Schedule and Dose")
+    price = st.number_input("Estimated Price", min_value=0.0)
+
+    # 🔽 Side Effect Section
     st.markdown("### 📉 Common Side Effects")
     side_effects_dict = {}
     num_effects = st.number_input("Number of Side Effects", min_value=0, max_value=10, step=1, key="n_effects")
@@ -87,8 +89,9 @@ with st.form("add_regimen_form"):
                 "grade": severity,
                 "percent": percent
             }
-    
- submitted = st.form_submit_button("✅ Add Regimen")
+
+    # Form submission
+    submitted = st.form_submit_button("✅ Add Regimen")
 
     if submitted:
         if cancer_type and stage and regimen_name:
@@ -119,6 +122,7 @@ with st.form("add_regimen_form"):
             st.success("✅ Regimen added successfully!")
         else:
             st.error("Please fill in all required fields.")
+
    
 
 # Show current data
