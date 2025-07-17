@@ -56,19 +56,25 @@ with st.form("add_regimen_form"):
     eligibility = st.text_input("Eligibility Criteria")
     pfs = st.text_input("PFS")
     os_val = st.text_input("OS")
-    side_effects = st.text_area("Side Effects (format: name:percent per line)")
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
+
+    st.markdown("### Side Effects Input")
+    side_effects_dict = {}
+    num_effects = st.number_input("Number of Common Side Effects", min_value=0, max_value=10, step=1)
+
+    for i in range(num_effects):
+        cols = st.columns([2, 1])
+        with cols[0]:
+            effect = st.text_input(f"Side Effect #{i+1}", key=f"effect_{i}")
+        with cols[1]:
+            percent = st.text_input(f"%", key=f"percent_{i}")
+        if effect:
+            side_effects_dict[effect] = percent
 
     submitted = st.form_submit_button("Add Regimen")
 
     if submitted:
-        side_effects_dict = {}
-        for line in side_effects.splitlines():
-            if ":" in line:
-                k, v = line.split(":", 1)
-                side_effects_dict[k.strip()] = v.strip()
-
         # Check if entry exists
         found = False
         for entry in guidelines:
