@@ -123,15 +123,4 @@ if prices_file is not None:
         f.write(prices_file.read())
     st.success("✅ Drug prices updated!")
 
-# Drug Prices - editable table
-st.subheader("💊 Edit Drug Prices")
-
-price_path = os.path.join(DATA_DIR, "drug_prices.csv")
-if os.path.exists(price_path):
-    df_prices = pd.read_csv(price_path)
-    edited_prices = st.data_editor(df_prices, num_rows="dynamic", use_container_width=True)
-    if st.button("💾 Save Drug Prices"):
-        edited_prices.to_csv(price_path, index=False)
-        st.success("Drug prices saved!")
-
 
