@@ -87,6 +87,13 @@ for i in range(num_effects):
             "percent": percent
         }
 
+    submitted = st.form_submit_button("✅ Save Side Effects")
+
+    if submitted:
+        for effect in side_effects_dict:
+            save_common_side_effect(effect)
+        st.success("Side effects saved successfully!")
+        
     submitted = st.form_submit_button("Add Regimen")
     if submitted:
         # Check if entry exists
