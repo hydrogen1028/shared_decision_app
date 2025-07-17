@@ -49,8 +49,10 @@ from utils.side_effects import load_common_side_effects, save_common_side_effect
 
 common_side_effects = load_common_side_effects()
 
-st.subheader("➕ Add New Cancer Regimen")
+
 with st.form("add_regimen_form"):
+    st.subheader("➕ Add New Cancer Regimen")
+    # basic regimen fields
     cancer_type = st.text_input("Cancer Type")
     stage = st.text_input("Stage")
     name = st.text_input("Regimen Name")
@@ -59,33 +61,32 @@ with st.form("add_regimen_form"):
     os_val = st.text_input("OS")
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
+    # side effect section
+    st.markdown("### 📉 Common Side Effects")
+    side_effects_dict = {}
+    num_effects = st.number_input("Number of Side Effects", min_value=0, max_value=10, step=1, key="n_effects")
 
-st.markdown("### Side Effects Input")
-side_effects_dict = {}
-num_effects = st.number_input("Number of Common Side Effects", min_value=0, max_value=10, step=1)
+    for i in range(num_effects):
+        cols = st.columns([2, 1, 1])
+        with cols[0]:
+            effect = st.selectbox(
+                f"Side Effect #{i+1}",
+                options=[""] + common_side_effects,
+                key=f"effect_{i}",
+            )
+            custom_effect = st.text_input("Or type a new side effect", key=f"custom_effect_{i}")
+            if custom_effect:
+                effect = custom_effect.strip()
+        with cols[1]:
+            severity = st.selectbox("Grade", options=["1", "2", "3", "4", "5"], key=f"grade_{i}")
+        with cols[2]:
+            percent = st.text_input("Percent (%)", key=f"percent_{i}")
 
-for i in range(num_effects):
-    cols = st.columns([2, 1, 1])
-    with cols[0]:
-        effect = st.selectbox(
-            f"Side Effect #{i+1}",
-            options=[""] + common_side_effects,
-            key=f"effect_{i}",
-        )
-        custom_effect = st.text_input("Or type a new side effect", key=f"custom_{i}")
-        if custom_effect:
-            effect = custom_effect
-            save_common_side_effect(custom_effect)  # Save new entry
-    with cols[1]:
-        severity = st.selectbox("Grade", options=["1", "2", "3", "4", "5"], key=f"grade_{i}")
-    with cols[2]:
-        percent = st.text_input(f"%", key=f"percent_{i}")
-
-    if effect:
-        side_effects_dict[effect] = {
-            "grade": severity,
-            "percent": percent
-        }
+        if effect:
+            side_effects_dict[effect] = {
+                "grade": severity,
+                "percent": percent
+            }
     
  submitted = st.form_submit_button("✅ Add Regimen")
 
