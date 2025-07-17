@@ -17,3 +17,21 @@ def display_therapies(therapies):
 
         st.markdown(f"**Schedule**: {t['schedule']}")
         st.markdown(f"**Estimated Price**: NT$ {t['price_per_cycle']:,} per cycle")
+
+
+from utils.pdf_export import create_pdf
+
+def display_therapies(therapies):
+    for t in therapies:
+        st.subheader(t["name"])
+        # ... display info ...
+
+        if st.button(f"📄 Download PDF Summary for {t['name']}"):
+            pdf_path = create_pdf(t)
+            with open(pdf_path, "rb") as f:
+                st.download_button(
+                    label="Download PDF",
+                    data=f,
+                    file_name=f"{t['name'].replace(' ', '_')}_summary.pdf",
+                    mime="application/pdf"
+                )
