@@ -56,7 +56,6 @@ with st.form("add_regimen_form"):
     schedule = st.text_input("Schedule")
     cost = st.number_input("Estimated Cost", min_value=0)
 
-
     submitted = st.form_submit_button("Add Regimen")
     if submitted:
         # Check if entry exists
